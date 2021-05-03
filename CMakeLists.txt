@@ -386,13 +386,13 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 
         set(FLACON_THIRD_PARTY_PATH "$ENV{PATH}" CACHE STRING "The path for searching for third-party programs. By defaul use environment $PATH variable.")
         if ( "${FLACON_THIRD_PARTY_PATH}" STREQUAL "" )
-            status_messageset("Use -DFLACON_THIRD_PARTY_PATH=\"/usrXXX YYY\" to set path for searching for third-party programs.")
+            status_message("Use -DFLACON_THIRD_PARTY_PATH=\"/usrXXX YYY\" to set path for searching for third-party programs.")
         endif()
 
 
         set(FLACON_CERT_IDENTITY "" CACHE STRING "The certificate identity used to sign the MacOS bundle.")
         if ( "${FLACON_CERT_IDENTITY}" STREQUAL "" )
-            status_messageset("Use -DFLACON_CERT_IDENTITY=\"123A4QWERT\" if you want to sign MacOs bundle.")
+            status_message("Use -DFLACON_CERT_IDENTITY=\"123A4QWERT\" if you want to sign MacOs bundle.")
         endif()
 
         include(cmake/bundle_utils.cmake)
