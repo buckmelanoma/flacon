@@ -25,8 +25,8 @@
 
 cmake_minimum_required(VERSION 3.0.2)
 cmake_policy(SET CMP0028 NEW)
-if (POLICY CMP0071) 
-    cmake_policy(SET CMP0071 NEW) 
+if (POLICY CMP0071)
+    cmake_policy(SET CMP0071 NEW)
 endif()
 
 project(flacon)
@@ -161,6 +161,45 @@ if (APPLE)
     )
 endif()
 
+# *************************************
+# Additional Qt Plugins
+# Will be added to the MacOS bundle
+set(FLACON_PLUGINS
+    Qt5::QCocoaIntegrationPlugin
+    Qt5::QMacStylePlugin
+    Qt5::QSvgIconPlugin
+
+    Qt5::QGifPlugin
+    Qt5::QICNSPlugin
+    Qt5::QICOPlugin
+    Qt5::QJpegPlugin
+    Qt5::QMacHeifPlugin
+    Qt5::QMacJp2Plugin
+    Qt5::QTgaPlugin
+    Qt5::QTiffPlugin
+    Qt5::QWbmpPlugin
+    Qt5::QWebpPlugin
+)
+
+# *************************************
+# External programs
+# Will be added to the MacOS bundle
+set(FLACON_THIRD_PARTY_PROGS
+    faac
+    flac
+    lame
+    mac
+    metaflac
+    mp3gain
+    oggenc
+    opusenc
+    sox
+    ttaenc
+    vorbisgain
+    wavpack
+    wvgain
+    wvunpack
+)
 
 set(LIBRARIES
 )
@@ -331,12 +370,48 @@ add_custom_command(TARGET ${PROJECT_NAME}
 
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+
+    set(BUNDLE_NAME "Flacon.app")
+    set(BUNDLE_PATH "${CMAKE_INSTALL_PREFIX}/${BUNDLE_NAME}")
+
     set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "Flacon")
-    install(TARGETS ${PROJECT_NAME} RUNTIME                 DESTINATION Flacon.app/Contents/MacOS)
-    install(FILES   ${QM_FILES}                             DESTINATION Flacon.app/Contents/translations)
-    install(FILES   ${CMAKE_CURRENT_BINARY_DIR}/flacon.1.gz DESTINATION Flacon.app/Contents/Resources)
-    install(FILES   ${CMAKE_CURRENT_BINARY_DIR}/Info.plist  DESTINATION Flacon.app/Contents)
-    install(FILES   images/mainicon/Flacon.icns             DESTINATION Flacon.app/Contents/Resources)
+    install(TARGETS ${PROJECT_NAME} RUNTIME                 DESTINATION ${BUNDLE_PATH}/Contents/MacOS)
+    install(FILES   ${QM_FILES}                             DESTINATION ${BUNDLE_PATH}/Contents/translations)
+    install(FILES   ${CMAKE_CURRENT_BINARY_DIR}/flacon.1.gz DESTINATION ${BUNDLE_PATH}/Contents/Resources)
+    install(FILES   ${CMAKE_CURRENT_BINARY_DIR}/Info.plist  DESTINATION ${BUNDLE_PATH}/Contents)
+    install(FILES   images/mainicon/Flacon.icns             DESTINATION ${BUNDLE_PATH}/Contents/Resources)
+
+
+    if ( MAC_BUNDLE )
+
+        set(FLACON_THIRD_PARTY_PATH "$ENV{PATH}" CACHE STRING "The path for searching for third-party programs. By defaul use environment $PATH variable.")
+        if ( "${FLACON_THIRD_PARTY_PATH}" STREQUAL "" )
+            status_messageset("Use -DFLACON_THIRD_PARTY_PATH=\"/usrXXX YYY\" to set path for searching for third-party programs.")
+        endif()
+
+
+        set(FLACON_CERT_IDENTITY "" CACHE STRING "The certificate identity used to sign the MacOS bundle.")
+        if ( "${FLACON_CERT_IDENTITY}" STREQUAL "" )
+            status_messageset("Use -DFLACON_CERT_IDENTITY=\"123A4QWERT\" if you want to sign MacOs bundle.")
+        endif()
+
+        include(cmake/bundle_utils.cmake)
+
+        install_qt5_plugins(${FLACON_PLUGINS} DESTINATION "${BUNDLE_NAME}/Contents/PlugIns")
+
+        install_third_party_binaries(
+            ${FLACON_THIRD_PARTY_PROGS}
+            PATHS ${FLACON_THIRD_PARTY_PATH}
+            DESTINATION  ${BUNDLE_PATH}/Contents/MacOS
+        )
+
+        fixup_qt5_bundle("${CMAKE_INSTALL_PREFIX}/${BUNDLE_NAME}")
+
+        if ( NOT "${FLACON_CERT_IDENTITY}" STREQUAL "" )
+            sign_bundle(${BUNDLE_PATH} "${FLACON_CERT_IDENTITY}")
+        endif()
+
+    endif()
 
 else()
     install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
