@@ -40,6 +40,7 @@ jobs:
           -DCMAKE_INSTALL_PREFIX=${CUR_DIR} \
           -DCMAKE_OSX_DEPLOYMENT_TARGET="10.10.1" \
           -DCMAKE_FRAMEWORK_PATH=$GITHUB_WORKSPACE \
+          -DFLACON_THIRD_PARTY_PATH="/usr/local/bin" \
           $GITHUB_WORKSPACE
 
     - name: Build
