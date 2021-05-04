@@ -6,16 +6,20 @@ env:
   BUILD_TYPE: Release
 
 jobs:
-  build:    
+  build:
     runs-on: macos-latest
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: Install packages 
+    - name: Install packages
       run:  |
         brew update --quiet
         brew install qt5 uchardet
+        brew install faac flac lame  mp3gain  sox vorbisgain wavpack opus-tools
+        cp -f /usr/local/bin/flac /usr/local/bin/mac
+        cp -f /usr/local/bin/flac /usr/local/bin/ttaenc
+
 
     - name: Install Saprkle
       run: |

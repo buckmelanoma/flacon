@@ -256,7 +256,7 @@ find_package(Qt5 REQUIRED
     Network
     LinguistTools
 )
-
+message("Use Qt: ${Qt5_DIR}")
 
 qt5_add_translation(QM_FILES ${TS_FILES})
 
@@ -302,7 +302,7 @@ if ( MAC_BUNDLE )
     find_package(Sparkle REQUIRED)
     include_directories(${SPARKLE_INCLUDE_DIR})
     set(LIBRARIES ${LIBRARIES} ${SPARKLE_LIBRARY})
-
+    message("Use SPARKLE: ${SPARKLE_LIBRARY}")
 
 endif()
 
