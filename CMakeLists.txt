@@ -167,7 +167,7 @@ endif()
 set(FLACON_PLUGINS
     Qt5::QCocoaIntegrationPlugin
     Qt5::QMacStylePlugin
-    Qt5::QSvgIconPlugin
+    #Qt5::QSvgIconPlugin
 
     Qt5::QGifPlugin
     Qt5::QICNSPlugin
@@ -384,9 +384,10 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 
     if ( MAC_BUNDLE )
 
-        set(FLACON_THIRD_PARTY_PATH "$ENV{PATH}" CACHE STRING "The path for searching for third-party programs. By defaul use environment $PATH variable.")
+        set(FLACON_THIRD_PARTY_PATH "" CACHE STRING "The path for searching for third-party programs. By defaul use environment $PATH variable.")
         if ( "${FLACON_THIRD_PARTY_PATH}" STREQUAL "" )
-            status_message("Use -DFLACON_THIRD_PARTY_PATH=\"/usrXXX YYY\" to set path for searching for third-party programs.")
+            status_message("Use -DFLACON_THIRD_PARTY_PATH=\"/usr/local/bin:/opt/homebrew/bin\" to set path for searching for third-party programs.")
+            set(FLACON_THIRD_PARTY_PATH "$ENV{PATH}")
         endif()
 
 
@@ -405,7 +406,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
             DESTINATION  ${BUNDLE_PATH}/Contents/MacOS
         )
 
-        fixup_qt5_bundle("${CMAKE_INSTALL_PREFIX}/${BUNDLE_NAME}")
+        fixup_qt5_bundle("${CMAKE_INSTALL_PREFIX}/${BUNDLE_NAME}" "${SPARKLE_LIBRARY}")
 
         if ( NOT "${FLACON_CERT_IDENTITY}" STREQUAL "" )
             sign_bundle(${BUNDLE_PATH} "${FLACON_CERT_IDENTITY}")

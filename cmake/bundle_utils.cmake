@@ -45,55 +45,48 @@ function(install_third_party_binaries)
     endforeach()
 endfunction()
 
-function(fixup_qt5_bundle _BUNDLE_PATH)
+function(fixup_qt5_bundle _BUNDLE_PATH _DIRS)
 
 	# **************************************
 	# Pass variables to INSTALL code
-	set(variables
-		_BUNDLE_PATH
-		CMAKE_FRAMEWORK_PATH
-	)
-
-	file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/bundle_vars "")
-	foreach(v ${variables})
-		file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/bundle_vars "set(${v} ${${v}})\n")
-	endforeach()
+	install(CODE "set(_BUNDLE_PATH \"${_BUNDLE_PATH}\")")
+	install(CODE "set(_DIRS \"${_DIRS}\")")
 
 	# **************************************
 	# INSTALL Qt config file
 	install(CODE [[
-		include(${CMAKE_CURRENT_BINARY_DIR}/bundle_vars)
+		message("###################################")
+		message("## Creating Qt config file")
 
 		set(QT_CONF_PATH "${_BUNDLE_PATH}/Contents/Resources/qt.conf")
 		set(QT_CONF_CONTENT "[Paths]\nPlugins = PlugIns\n")
 
 		file(MAKE_DIRECTORY "${_BUNDLE_PATH}/Contents/Resources/")
 		file(WRITE "${QT_CONF_PATH}" "${QT_CONF_CONTENT}")
-		]]
-		COMPONENT Runtime
-		)
+
+	]] COMPONENT Runtime)
 
 	# **************************************
 	# FixUp bundle
-	INSTALL(CODE [[
-		include(${CMAKE_CURRENT_BINARY_DIR}/bundle_vars)
+	install(CODE [[
+		message("###################################")
+		message("## Fixuping bundle")
 
 		file(GLOB_RECURSE plugins
 			LIST_DIRECTORIES false
 			${_BUNDLE_PATH}/Contents/PlugIns/*
 		)
 
-		file(TO_CMAKE_PATH ${CMAKE_FRAMEWORK_PATH} dirs)
 		include(BundleUtilities)
-		fixup_bundle("${_BUNDLE_PATH}" "${plugins}" "${dirs}")
-		]] COMPONENT Runtime
-	)
+		fixup_bundle("${_BUNDLE_PATH}" "${plugins}" "${_DIRS}")
+
+	]] COMPONENT Runtime )
+
 
 endfunction()
 
 
 function(sign_bundle _BUNDLE_PATH _CERT_IDENTITY)
-	message("CMAKE_SYSTEM_VERSION: ${CMAKE_SYSTEM_VERSION}")
 
 	# **************************************
 	# Pass variables to INSTALL code
@@ -102,8 +95,8 @@ function(sign_bundle _BUNDLE_PATH _CERT_IDENTITY)
 
 
 	install(CODE [[
-		message("***********************************")
-		message("** Signing the bundle")
+		message("###################################")
+		message("## Signing the bundle")
 
 		execute_process(COMMAND
 			codesign
@@ -114,8 +107,8 @@ function(sign_bundle _BUNDLE_PATH _CERT_IDENTITY)
 		 	"${_BUNDLE_PATH}"
 			)
 
-		message("***********************************")
-		message("** Verifying the signature")
+		message("###################################")
+		message("## Verifying the signature")
 		execute_process(COMMAND
 			codesign
 			-v
